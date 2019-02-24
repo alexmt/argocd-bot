@@ -13,6 +13,11 @@ describe('argo-cd-bot', () => {
         probot = new Probot({})
         const app = probot.load(argocdBot)
         app.app = () => 'test'
+
+        // node env variables
+        process.env.ARGO_CD_API_TOKEN = 'token';
+        process.env.ARGO_CD_SERVER_IP = '1.2.3.4'
+         
     })
 
     // I'm not sure how to properly fix this
@@ -27,6 +32,10 @@ describe('argo-cd-bot', () => {
         const child_process = require('child_process')
         const execStub = sinon.stub(child_process, 'exec')
         execStub.yields(false)
+
+        // TODO fix me
+        nock('https://1.2.3.4').get('/api/v1/applications?fields=items.metadata.name,items.spec.source.path,items.spec.source.repoURL')
+            .reply(200, {"items": {"metadata": { "name": "app1" }, "spec": { "source": { "path": "dir1" } } } })
 
         await probot.receive({name: 'issue_comment', payload})
     })
